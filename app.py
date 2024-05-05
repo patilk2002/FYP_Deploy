@@ -298,3 +298,5 @@ def results():
     return render_template('results.html', responses=responses, zipped_data=zipped_data)
 
 
+if __name__ == '__main__':
+    app.run(debug=True)
