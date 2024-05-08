@@ -11,6 +11,13 @@ from threading import Thread
 import pandas as pd 
 from random import sample
 
+import firebase_admin
+from firebase_admin import db, credentials
+
+
+
+cred = credentials.Certificate("credentials.json")
+firebase_admin.initialize_app(cred, {"databaseURL": "https://finalyear-6e8d2-default-rtdb.firebaseio.com/"})
 
 app = Flask(__name__)
 
@@ -46,7 +53,7 @@ def plot_mouse_tracking(label, mouse_data_list, timestamp):
     cor_y = [700-point["y"] for point in mouse_data_list]
 
     folder_path = os.path.join("static", "graphs", label)
-    os.makedirs(folder_path, exist_ok=True)  # Create folder if it doesn't exist
+    #os.makedirs(folder_path, exist_ok=True)  # Create folder if it doesn't exist
 
     # plt.plot(cor_x, cor_y)
     # plt.title("Mouse Tracking")
@@ -208,13 +215,13 @@ def index():
     # debugging 
     # Specify the file path
 
-    csv_file_path = 'static/questions/survey_questions_fyp.csv'
+    # csv_file_path = 'static/questions/survey_questions_fyp.csv'
 
     # Read the CSV file into a DataFrame
-    df = pd.read_csv(csv_file_path)
-    df.columns = ['Sr','Question']
+    # df = pd.read_csv(csv_file_path)
+    # df.columns = ['Sr','Question']
 
-    random_row = df.sample(n=1)
+    # random_row = df.sample(n=1)
     # print(random_row)
     # question = random_row['Question'].values[0]
 
@@ -281,7 +288,58 @@ def submit():
     velocity = displacement * 1000 / float(responseTime)
 
     # Add mouse tracking data to CSV file with the label
-    write_mouse_tracking_to_csv(userId, initialEmotion, age, gender, occupation, computerOpSkill, label, stimulus, response, responseTime, currentEmotion, mouse_data_list, no_of_clicks, mouse_clicks_list, mouse_downtimes_list, click_moments_list, speed, velocity)
+
+
+    # write_mouse_tracking_to_csv(userId, initialEmotion, age, gender, occupation, computerOpSkill, label, stimulus, response, responseTime, currentEmotion, mouse_data_list, no_of_clicks, mouse_clicks_list, mouse_downtimes_list, click_moments_list, speed, velocity)
+
+
+
+
+
+    # global userId, age, gender, occupation, computerOpSkill, initialEmotion
+
+    # Your existing code to collect form data goes here
+
+    # Get a reference to the Firebase Realtime Database
+    db_ref = db.reference('/submissions')
+
+    # Construct data object
+    data = {
+        'User_ID': userId,
+        'Initial_Emotion': initialEmotion,
+        'Age': age,
+        'Gender': gender,
+        'Occupation': occupation,
+        'Computer_Operating_Skill': computerOpSkill,
+        'Label': label,
+        'Stimulus': stimulus,
+        'Response': response,
+        'Response_Time': responseTime,
+        'Current_Emotion': currentEmotion,
+        'Mouse_Data': mouse_data_list,
+        'Mouse_Clicks': no_of_clicks,
+        'Mouse_Clicks_List': mouse_clicks_list,
+        'Mouse_Downtime_List': mouse_downtimes_list,
+        'Click_Moments_List': click_moments_list,
+        'Speed': speed,
+        'Velocity': velocity,
+        'Graph_file': 'excitement_20240503175439873244_graph.png'  # Assuming this is static for now
+    }
+
+    # Push the data to Firebase
+    new_entry_ref = db_ref.push(data)
+
+
+
+
+
+
+
+
+
+
+
+
 
     # Move to the next question or show results when all questions are answered
     next_question_index = len(responses)
